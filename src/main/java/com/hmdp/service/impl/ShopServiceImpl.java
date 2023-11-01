@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.TimeUnit;
 
@@ -29,6 +30,8 @@ import static com.hmdp.utils.RedisConstants.CACHE_SHOP_TTL;
 @Service
 public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IShopService {
 
+    @Autowired
+    private ShopMapper shopMapper;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Override
@@ -51,5 +54,17 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         stringRedisTemplate.opsForValue().set(CACHE_SHOP_KEY+id, jsonStr,CACHE_SHOP_TTL, TimeUnit.MINUTES);
 
         return Result.ok(byId);
+    }
+
+    @Override
+    @Transactional
+    public Result updateshop(Shop shop) {
+        this.updateById(shop);
+        String key = CACHE_SHOP_KEY + shop.getId();
+        if (StrUtil.isEmpty(key)){
+            return Result.fail("查询失败，电批id为空");
+        }
+        stringRedisTemplate.opsForValue().set(key,JSONUtil.toJsonStr(shop),CACHE_SHOP_TTL,TimeUnit.MINUTES);
+        return Result.ok(shop);
     }
 }
