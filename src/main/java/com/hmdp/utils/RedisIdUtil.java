@@ -24,22 +24,23 @@ public class RedisIdUtil {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    private static final long BEGIN_TIMESTAMP = 1000512000L;
-    private static final int WEIYUNSUAN = 32;
+//    private static final long BEGIN_TIMESTAMP = 1000512000L;
+    private static final long BEGIN_TIMESTAMP = 1672531200L;
+    private static final int COUNT_BITS = 32;
 
     public Long nexiId(String keyPrefix){
         //时间戳
-        LocalDateTime localDateTime = LocalDateTime.now();
-        long now = localDateTime.toEpochSecond(ZoneOffset.UTC);
-        long nowStamp = now - BEGIN_TIMESTAMP;
+        LocalDateTime now = LocalDateTime.now();
+        long nowSecond = now.toEpochSecond(ZoneOffset.UTC);
+        long timesStamp = nowSecond - BEGIN_TIMESTAMP;
 
-        String localDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy:MM:dd"));
+
+        String date = now.format(DateTimeFormatter.ofPattern("yyyy:MM:dd"));
 
         //序列号
-        Long increment = stringRedisTemplate.opsForValue().increment("incrementID:" + keyPrefix + ":" + localDate + ":"+nowStamp);
+        long count = stringRedisTemplate.opsForValue().increment("icr:" + keyPrefix + ":" + date );
 
-
-        return nowStamp << WEIYUNSUAN | increment;
+        return timesStamp << COUNT_BITS | count;
     }
 
 
