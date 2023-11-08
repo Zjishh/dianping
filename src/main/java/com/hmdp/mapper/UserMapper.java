@@ -1,7 +1,9 @@
 package com.hmdp.mapper;
 
+import com.hmdp.dto.LoginFormDTO;
 import com.hmdp.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * <p>
@@ -13,4 +15,10 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface UserMapper extends BaseMapper<User> {
 
+    @Select("select * from tb_user where phone = #{inphone}")
+    User selectbyphone(String inphone);
+
+
+    @Select("insert into tb_user (phone,nick_name) value (#{inphone},#{username})")
+    void loginone(String inphone,String username);
 }
